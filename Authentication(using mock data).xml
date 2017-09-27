@@ -1,0 +1,128 @@
+package com.yasir.myblog;
+
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+public class AuthenticationActivity extends AppCompatActivity {
+      EditText username,password;
+    ProgressDialog progressDialog;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_authentication);
+        username=(EditText)findViewById(R.id.username);
+        password=(EditText)findViewById(R.id.password);
+        Button signin,register;
+        signin=(Button)findViewById(R.id.signin);
+        register=(Button)findViewById(R.id.register);
+
+        signin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              if(isFormValid()){
+                  //perform sign in
+                  performSignin();
+              }
+            }
+        });
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isFormValid()){
+                    //perform register
+                }
+            }
+        });
+
+        progressDialog =new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("please wait");
+    }
+    private boolean isFormValid(){
+        if(username.getText().toString().isEmpty()){
+            Toast.makeText(this, "please enter username", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(password.getText().toString().isEmpty()){
+            Toast.makeText(this, "please enter password", Toast.LENGTH_SHORT).show();
+           return false;
+        }
+        return true;
+    }
+    private void performSignin(){
+        //here signinTask is class we have created and running doInBackground method,there it is checked whether credentials are
+        //correct or not,
+             new SignInTask().execute(username.getText().toString(),password.getText().toString());//this is nothing but
+        //doInbackground method
+    }
+    private void performregister(){
+
+    }
+    //creating show alert box when we complete entering details ,it should be declaerd in postExecute
+    private void ShowAlert(String title,String message){
+        final AlertDialog.Builder buider=new AlertDialog.Builder(this);
+        buider.setTitle(title);
+        buider.setMessage(message);
+        buider.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+               dialog.dismiss();
+            }
+        });
+      buider.show();
+    }
+    private void showProgressDialog(Boolean should){
+        if(should)
+          progressDialog.show();
+        else
+            progressDialog.dismiss();
+
+    }
+   class SignInTask extends AsyncTask<String,Void,Boolean>{
+       String mkusername="test";//mock username
+       String mkpassword="password";//mock password
+       @Override
+
+       protected void onPreExecute() {
+           super.onPreExecute();
+           //before signin task(i.e.,doInbackground is done it shows progess bar
+           showProgressDialog(true);
+
+       }
+
+       @Override
+       protected void onPostExecute(Boolean aBoolean) {
+           super.onPostExecute(aBoolean);
+           //after doInbackground is done
+           showProgressDialog(false);
+           if(aBoolean){
+               ShowAlert("Welcome ","You have successfully signed in");
+           }
+           else{
+               ShowAlert("Error","Please enter details carefully");
+           }
+       }
+
+       @Override
+       protected Boolean doInBackground(String... params) {
+         String username=params[0];
+           String password=params[1];
+           //sleeping this method to show progress dialog,if not slept we dont see progress dialog
+           try {
+               Thread.sleep(2000);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+           //
+           return username.contentEquals(mkusername)&&password.contentEquals(mkpassword);
+       }
+   }
+}
